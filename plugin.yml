@@ -6,9 +6,9 @@ description: A game inspired by Dream's video on YouTube.
 commands:
 
     playblockshuffle:
-    description: Starts the block shuffle game
-    usage: /playblockshuffle
+      description: Starts the block shuffle game
+      usage: /playblockshuffle
     
     stopblockshuffle:
-    description: Stops the block shuffle game
-    usage: /stopblockshuffle
+      description: Stops the block shuffle game
+      usage: /stopblockshuffle
