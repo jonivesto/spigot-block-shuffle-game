@@ -1,0 +1,14 @@
+main: com.jonivesto.blockshuffle.Main
+name: BlockShuffleGame
+version: 1.0
+author: Joni-Pekka Vesto
+description: A game inspired by Dream's video on YouTube.
+commands:
+
+    playblockshuffle:
+    description: Starts the block shuffle game
+    usage: /playblockshuffle
+    
+    stopblockshuffle:
+    description: Stops the block shuffle game
+    usage: /stopblockshuffle
