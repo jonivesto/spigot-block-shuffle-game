@@ -1,4 +1,4 @@
-#Spigot Block Shuffle game
+# Spigot Block Shuffle game
 Inspired by Dream's video on YouTube. Built and tested in 1.15.2. However, I don't see why it would not work on other versions as well.
 
 You can have as many players as you want. The game assigns each player a block they must find and jump on before time runs out. If someone finds their block, everyone is given a new block. The game goes on forever, but it can be restated using commands. If someone joins the server while others are playing, they will be in spectator gamemode until new game is started.
