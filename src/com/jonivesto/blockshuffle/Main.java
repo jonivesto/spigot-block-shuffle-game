@@ -23,12 +23,15 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class Main extends JavaPlugin implements Listener {
 
 	// Defines if there is a running game in progress
 	boolean gameActive = false;
 	boolean blockFound = true;
+	int secsLeft = 0;
 	
 	// This object shuffles the blocks:
 	Random random = new Random();
@@ -39,12 +42,27 @@ public class Main extends JavaPlugin implements Listener {
 	
 	@Override
     public void onEnable() {
-		getServer().getPluginManager().registerEvents(this, this);   
+		getServer().getPluginManager().registerEvents(this, this);
+		// Time left counter
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+		    @Override
+		    public void run() {
+		    	if(gameActive==false||blockFound==true) return;
+		    	for(Player player : getServer().getOnlinePlayers()) {
+		    		secsLeft--;
+		    		if(secsLeft < 0) {
+		    			secsLeft = 0;
+		    			blockFound = true;
+		    			player.sendMessage("It's a draw! No one found their block in time.");	
+		    			shuffle();
+		    		}
+		    		else
+		    		player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GOLD+"Time left: "+secsLeft+"s"));	    		
+		    	}
+		    }
+		}, 0L, 20L);
 	}
 
-	@Override
-    public void onDisable() {}
-    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) { 	
     	// Stop command
@@ -72,6 +90,7 @@ public class Main extends JavaPlugin implements Listener {
 	private void stopGame() {
 		gameActive = false;
 		blockFound = true;
+		secsLeft = 0;
 	}
 
 	private void newGame() {
@@ -84,12 +103,12 @@ public class Main extends JavaPlugin implements Listener {
 				player.setGameMode(GameMode.SURVIVAL);
 			}
 			// Inform player that game has started:
-			player.sendMessage(ChatColor.DARK_PURPLE +"You were added to a new game of block shuffle!");
+			player.sendMessage(ChatColor.DARK_PURPLE +"You were added to a new game of block shuffle!");			
 		}
 		// Set game active so no one can join it anymore
 		gameActive = true;
 		// Start game flow by giving the blocks
-		shuffle();		
+		shuffle();
 	}
 	
 	// Randomly picks blocks for the shuffle() method:
@@ -102,15 +121,17 @@ public class Main extends JavaPlugin implements Listener {
             ||material.name().contains("COMMAND")
             ||material.name().contains("BARRIER")
             ||material.name().contains("PURPUR")
-            ||material.name().contains("DRAGON")
             ||material.name().contains("STRUCTURE")
             ||material.name().contains("CHORUS")
             ||material.name().contains("BEACON")
             ||material.name().contains("HEAD")
             ||material.name().contains("SHULKER")
             ||material.name().contains("ENDER_")
-            ||material.isBlock()==false
-            ||material.isSolid()==false) {
+            ||material.name().contains("EGG")
+            ||material.name().contains("WALL")
+            ||material.name().matches(".*\\d.*")
+            ||material.isBlock() == false
+            ||material.isSolid() == false) {
             material = Material.values()[random.nextInt(length)];
         }
         return material;
@@ -134,6 +155,7 @@ public class Main extends JavaPlugin implements Listener {
 		
 		updateScoreboard();
 		blockFound = false;
+		secsLeft = 300; // 5 minutes
 	}
 	
 	@EventHandler
@@ -203,4 +225,5 @@ public class Main extends JavaPlugin implements Listener {
 			player.setScoreboard(scoreboard);
 		}
 	}
+	
 }
