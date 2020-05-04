@@ -1,5 +1,7 @@
 package com.jonivesto.blockshuffle;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -31,9 +33,14 @@ public class Main extends JavaPlugin implements Listener {
 	// Defines if there is a running game in progress
 	boolean gameActive = false;
 	boolean blockFound = true;
-	int secsLeft = 0;
 	
-	// This object shuffles the blocks:
+	// Timer
+	Date lastShuffle;
+	final long DEFAULT_SHUFFLE_INTERVAL = 300000; // (5 minutes)
+	final long MIN_SHUFFLE_INTERVAL = 10000; // (10 seconds)
+	long shuffleInterval = DEFAULT_SHUFFLE_INTERVAL; 
+	
+	// Random used to pick random block IDs
 	Random random = new Random();
 	
 	// List of players in active game.
@@ -47,17 +54,22 @@ public class Main extends JavaPlugin implements Listener {
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 		    @Override
 		    public void run() {
-		    	if(gameActive==false||blockFound==true) return;
-		    	for(Player player : getServer().getOnlinePlayers()) {
-		    		secsLeft--;
-		    		if(secsLeft < 0) {
-		    			secsLeft = 0;
-		    			blockFound = true;
-		    			player.sendMessage("It's a draw! No one found their block in time.");	
-		    			shuffle();
-		    		}
-		    		else
-		    		player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GOLD+"Time left: "+secsLeft+"s"));	    		
+		    	if(gameActive==false||blockFound==true||lastShuffle==null) return;
+		    	long elapsedMillis = new Date().getTime() - lastShuffle.getTime();
+		    	if(elapsedMillis>=shuffleInterval) {		    			
+	    			blockFound = true;
+	    			for(Player player : getServer().getOnlinePlayers()) {	
+	    				player.sendMessage("It's a draw! No one found their block in time.");	
+	    			}
+	    			shuffle();
+	    		}
+		    	else {
+			    	for(Player player : getServer().getOnlinePlayers()) {	    		
+			    		player.spigot().sendMessage(
+			    				ChatMessageType.ACTION_BAR, 
+			    				new TextComponent(ChatColor.GOLD+"Time left: "+((shuffleInterval/1000)-(elapsedMillis/1000))+"s"
+			    		));	    		
+			    	}
 		    	}
 		    }
 		}, 0L, 20L);
@@ -81,6 +93,16 @@ public class Main extends JavaPlugin implements Listener {
         else if (command.getName().equalsIgnoreCase("playblockshuffle")) {
         	// Return if game already active
         	if(gameActive) return true;
+        	// set refreshInterval if it's given
+        	if(args.length>0) {
+        		try {
+        			shuffleInterval = Long.parseLong(args[0]);
+        		}catch(Exception e) {
+        			shuffleInterval = DEFAULT_SHUFFLE_INTERVAL;
+        		}      		
+        	}
+        	// Don't allow too short interval
+        	if(shuffleInterval<MIN_SHUFFLE_INTERVAL) shuffleInterval = MIN_SHUFFLE_INTERVAL;
             newGame();
             return true;
         }
@@ -90,9 +112,9 @@ public class Main extends JavaPlugin implements Listener {
 	private void stopGame() {
 		gameActive = false;
 		blockFound = true;
-		secsLeft = 0;
+		lastShuffle = null;
 	}
-
+	
 	private void newGame() {
 		contestants.clear();
 		// Only players who are online when start command runs are added to the game
@@ -103,7 +125,8 @@ public class Main extends JavaPlugin implements Listener {
 				player.setGameMode(GameMode.SURVIVAL);
 			}
 			// Inform player that game has started:
-			player.sendMessage(ChatColor.DARK_PURPLE +"You were added to a new game of block shuffle!");			
+			player.sendMessage(ChatColor.DARK_PURPLE +"You were added to a new game of block shuffle!");
+			
 		}
 		// Set game active so no one can join it anymore
 		gameActive = true;
@@ -155,7 +178,7 @@ public class Main extends JavaPlugin implements Listener {
 		
 		updateScoreboard();
 		blockFound = false;
-		secsLeft = 300; // 5 minutes
+		lastShuffle = new Date();
 	}
 	
 	@EventHandler

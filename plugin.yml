@@ -7,7 +7,7 @@ commands:
 
     playblockshuffle:
       description: Starts the block shuffle game
-      usage: /playblockshuffle
+      usage: /playblockshuffle <optional shuffle interval in milliseconds>
     
     stopblockshuffle:
       description: Stops the block shuffle game
