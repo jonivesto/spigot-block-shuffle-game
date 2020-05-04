@@ -135,7 +135,7 @@ public class Main extends JavaPlugin implements Listener {
 	}
 	
 	// Randomly picks blocks for the shuffle() method:
-    private Material getRandomMaterial() {
+    private Material getRandomMaterial(Material previous) {
         // Get the limit for the range used for shuffle:
         int length = Material.values().length-1;
         // Shuffle until the result is a block:
@@ -152,7 +152,12 @@ public class Main extends JavaPlugin implements Listener {
             ||material.name().contains("ENDER_")
             ||material.name().contains("EGG")
             ||material.name().contains("WALL")
+            ||material.name().contains("BED_BLOCK")
+            ||material.name().contains("PISTON")
+            ||material.name().equals("STEP")
+            ||material.name().equals("DOUBLE_STEP")
             ||material.name().matches(".*\\d.*")
+            ||material.name().equals(previous.name())
             ||material.isBlock() == false
             ||material.isSolid() == false) {
             material = Material.values()[random.nextInt(length)];
@@ -162,10 +167,10 @@ public class Main extends JavaPlugin implements Listener {
 	
 	private void shuffle() {	
 		// Assign new block for each player in contestants list
-		for(Contestant contestant : contestants.values()) {
-			
+		for(Contestant contestant : contestants.values()) {		
 			contestant.previousTarget = contestant.currentTarget;
-			contestant.currentTarget = getRandomMaterial();
+			if(contestant.previousTarget == null) contestant.previousTarget = Material.GOLD_BLOCK;
+			contestant.currentTarget = getRandomMaterial(contestant.previousTarget);
 		}	
 		// Inform the players about their new blocks.
 		// Only sent to players that are online.
