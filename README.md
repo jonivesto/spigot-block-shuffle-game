@@ -5,7 +5,8 @@ You can have as many players as you want. The game assigns each player a block t
 
 # Install
 1. Download the jar file from https://github.com/jonivesto/spigot-block-shuffle-game/tree/master/target
-2. Put it to your server's `plugins` directory and start your server.
+2. Put it to your server's `plugins` directory
+3. Start your server
 
 # In-game commands:
 - Start the game: `/playblockshuffle`
